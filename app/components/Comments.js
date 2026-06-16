@@ -10,9 +10,9 @@ export default function Comments() {
     const script = document.createElement("script");
     script.src = "https://giscus.app/client.js";
     script.setAttribute("data-repo", "ashokpara/EPM-BITES");
-    script.setAttribute("data-repo-id", "REPLACE_WITH_REPO_ID");
+    script.setAttribute("data-repo-id", "R_kgDOS8PQeQ");
     script.setAttribute("data-category", "General");
-    script.setAttribute("data-category-id", "REPLACE_WITH_CATEGORY_ID");
+    script.setAttribute("data-category-id", "DIC_kwDOS8PQec4C_Rut");
     script.setAttribute("data-mapping", "pathname");
     script.setAttribute("data-strict", "0");
     script.setAttribute("data-reactions-enabled", "1");
