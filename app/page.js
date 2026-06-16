@@ -15,7 +15,7 @@ export default function Home() {
   return (
     <div className="container">
       <div className="hero">
-        <h1>Oracle EPM Talks</h1>
+        <h1>The EPM Post</h1>
         <p>
           Practical insights for Oracle EPM professionals — Planning, Essbase,
           EDM, FDMEE, Narrative Reporting, and everything in between.

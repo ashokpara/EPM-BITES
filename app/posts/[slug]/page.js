@@ -11,7 +11,7 @@ export async function generateMetadata({ params }) {
   const { slug } = await params;
   const post = getPostBySlug(slug);
   return {
-    title: `${post.title} — Oracle EDM`,
+    title: `${post.title} — The EPM Post`,
     description: post.excerpt,
   };
 }

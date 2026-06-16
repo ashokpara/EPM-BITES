@@ -1,5 +1,5 @@
 ---
-title: "Welcome to Oracle EPM Talks"
+title: "Welcome to The EPM Post"
 date: "2026-06-16"
 excerpt: "A blog for Oracle EPM professionals — covering Planning, Essbase, EDM, FDMEE, and the real-world challenges of implementing and maintaining EPM solutions."
 ---
