@@ -1,12 +1,12 @@
 ---
 title: "Oracle EDM June 2026 Release: What's New"
 date: "2026-06-16"
-excerpt: "The June 2026 update for Oracle Enterprise Data Management brings 9 noteworthy enhancements — from external validations and granular metadata migration to smarter expressions and improved UI. Here's a deep dive into everything that shipped."
+excerpt: "The June 2026 update for Oracle Enterprise Data Management brings 12 enhancements — from an AI assistant and cross-application node references to external validations, granular metadata migration, and more. Here's a deep dive into everything that shipped."
 ---
 
 # Oracle EDM June 2026 Release: What's New
 
-The June 2026 (26.06) update for Oracle Enterprise Data Management Cloud is out, and it's a strong release. There are 9 enhancements across governance, data quality, expressions, migration, and the UI — several of which will meaningfully change how teams work day to day.
+The June 2026 (26.06) update for Oracle Enterprise Data Management Cloud is out, and it's a strong release. There are 12 enhancements across governance, data quality, expressions, migration, AI, and the UI — several of which will meaningfully change how teams work day to day.
 
 Here's a full breakdown of everything that shipped.
 
@@ -136,6 +136,53 @@ Not a major functional change, but if you use chart display regularly, the workf
 
 ---
 
+## 10. Change Management AI Assistant
+
+The biggest surprise in the June release: a generative AI chat interface built directly into EDM.
+
+The Change Management AI Assistant is accessed via an "Ask Oracle" button in open views. Using natural language, you can:
+- **Query data** — find nodes that meet specific criteria without building a filter manually
+- **Explore node details and history** — ask about a specific node's properties, changes, or lineage
+- **Make bulk updates** — update properties, relationships, or nodes across many members in a single conversational request
+- **Review change requests** — inquire about open requests and review pending changes through dialog
+
+The assistant automatically generates viewpoint queries and change requests from your conversation, which you can then review and edit before committing.
+
+This is an optional feature and must be enabled in system settings. For teams managing large, complex hierarchies, the bulk update capability alone could save significant time — tasks that previously required scripting or manual iteration can now be described in plain language.
+
+---
+
+## 11. Cross-Application Support for Node and Node List Data Type Properties
+
+A significant change to how Node and Node List properties work in EDM.
+
+Previously, Node and Node List data type properties could only reference node sets within the same application. That limitation forced teams to use subscriptions to synchronize nodes into the same application just to make them referenceable. This release removes that constraint entirely.
+
+Node and Node List properties can now reference node sets in **different applications**. Two new parameters in the Property inspector support this:
+- **Assigned Application** — select the target application
+- **Assigned Dimension** — select the node set from that application
+
+Referenced properties can be defined, derived, or inherited, and node properties and locations from the referenced application are accessible in expressions.
+
+**Impact:** this eliminates a category of subscription overhead that existed purely to work around the single-application limitation. Cross-application relationships can now be modeled directly as properties, simplifying application architecture.
+
+---
+
+## 12. Additional Properties for Source FX Movements in Tax Reporting Applications
+
+A targeted enhancement for Tax Reporting application users.
+
+Two new properties are now available for the Movement dimension in Tax Reporting applications:
+
+- **Is FX Source Rate Movement** — flags whether a movement is designated as an FX source rate movement
+- **FX Source Rate Movement** — specifies which source movement to use for FX rate translation
+
+A predefined **Source Rate Movement Check** validation is also included, preventing `FX Source Rate Movement` and `Apply FX Source Rate Account to Movement` from being set simultaneously — avoiding a configuration conflict that could produce incorrect translation results.
+
+These properties are added automatically when registering a new Movement dimension, or can be added when modifying an existing dimension registration.
+
+---
+
 ## Summary
 
 | Feature | Category |
@@ -149,5 +196,8 @@ Not a major functional change, but if you use chart display regularly, the workf
 | Distinct and Sort for String Lists in Expressions | Expressions |
 | Find Method and List Property for Descendants | Expressions |
 | Viewpoint Chart Display Improvements | UI / UX |
+| Change Management AI Assistant | AI |
+| Cross-Application Node and Node List Properties | Architecture |
+| Source FX Movement Properties for Tax Reporting | Tax Reporting |
 
-The external custom validations and granular templates are the two features with the most impact on how EDM is architected and operated — both worth exploring in your non-production environment before the next release cycle.
+The standout features this release are the **Change Management AI Assistant**, **External Custom Validations**, and **Cross-Application Node Properties** — each one removes a meaningful limitation that EPM practitioners have had to work around. All three are worth prioritizing in your next non-production testing cycle.
