@@ -14,6 +14,9 @@ export default function RootLayout({ children }) {
             <a href="/" className="site-logo">
               The EPM Post <span>/ blog</span>
             </a>
+            <nav className="site-nav">
+              <a href="/about">About</a>
+            </nav>
           </div>
         </header>
         <main>{children}</main>
