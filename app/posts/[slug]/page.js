@@ -3,6 +3,7 @@ import { getAllPosts, getPostBySlug } from "../../../lib/posts";
 import { marked } from "marked";
 import Comments from "../../components/Comments";
 import ShareBar from "../../components/ShareBar";
+import ImageLightbox from "../../components/ImageLightbox";
 
 export async function generateStaticParams() {
   const posts = getAllPosts();
@@ -47,6 +48,8 @@ export default async function PostPage({ params }) {
         className="post-content"
         dangerouslySetInnerHTML={{ __html: html }}
       />
+
+      <ImageLightbox />
 
       <ShareBar title={post.title} slug={slug} />
 
