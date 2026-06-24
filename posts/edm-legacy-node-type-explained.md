@@ -18,7 +18,7 @@ That's a COA mapping problem, and EDM is the right tool for it. But it's also ex
 
 The EBS COA on this engagement had a few thousand account combinations once you accounted for all the segments — company, store/location, account, and a custom segment that had been bolted on years earlier to track promotional and markdown activity separately, which by this point nobody on the current finance team had a clean explanation for. None of that legacy structure mattered to the business going forward. It existed purely so we could trace every legacy combination to its new home in the redesigned Fusion COA and prove nothing got lost in the conversion — store-level P&L accuracy especially, since that's what regional VPs look at every single week.
 
-The instinct is to just load the entire legacy EBS structure straight into EDM and start mapping. Which works fine functionally, right up until someone on the program finance team notices the EDM subscription's node count jumped and asks why they're paying to license thousands of accounts that are getting retired the day after cutover.
+The instinct is to just load the entire legacy EBS structure straight into EDM and start mapping. Which works fine functionally, right up until someone on the program finance team notices the EDM subscription's node count jumped and asks why they're paying to license thousands of accounts that are getting retired the day after cutover. (I'll go deeper on how EDM licensing and node counts actually work in a future post — there's enough nuance there for its own write-up.)
 
 ## What I did instead
 
