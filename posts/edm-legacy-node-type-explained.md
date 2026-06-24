@@ -8,7 +8,7 @@ excerpt: "A multi-banner retail client was finally moving off EBS onto Oracle Cl
 
 I want to walk through a specific situation instead of talking about this feature in the abstract, because that's how it actually clicked for me too.
 
-A retail client of mine had been running EBS for close to fifteen years and was finally making the move to Oracle Cloud ERP. Classic retail story — store count had roughly tripled since the original EBS implementation, a couple of regional banners had been folded in along the way, and the Chart of Accounts had grown to match. Segments that were meant to track store location got repurposed to track distribution centers too at some point, there were account combinations from store formats that didn't even exist anymore, and naturally the project team decided this was the moment to do a proper COA redesign instead of just lifting and shifting the mess into the new system.
+A couple of years ago I worked with a retail client that had been running EBS for close to fifteen years and was finally making the move to Oracle Cloud ERP. Classic retail story — store count had roughly tripled since the original EBS implementation, a couple of regional banners had been folded in along the way, and the Chart of Accounts had grown to match. Segments that were meant to track store location got repurposed to track distribution centers too at some point, there were account combinations from store formats that didn't even exist anymore, and naturally the project team decided this was the moment to do a proper COA redesign instead of just lifting and shifting the mess into the new system.
 
 That meant capturing the entire legacy EBS COA, building the new Fusion Cloud COA structure, and mapping every single legacy combination to where it belonged in the new world. Get that wrong and you've got broken reporting and reconciliation headaches for years after go-live. Get it right and the new COA actually works the way finance wants it to from day one.
 
@@ -24,9 +24,9 @@ The instinct is to just load the entire legacy EBS structure straight into EDM a
 
 I set up a Legacy GL node type and loaded the EBS COA into it exactly as it existed in the source system — same segment values, same combinations, same naming quirks, no cleanup. The point wasn't to make it pretty. The point was to have an accurate, queryable copy of the legacy structure sitting in EDM, available for mapping and validation, without it costing anything against the subscription.
 
-Here's what that actually looks like in EDM. I named it `GlMappingLegacy`, set the Node Type Class to **Legacy GL**, and gave it a description that's blunt about what it's for — "Merger Temp. Node Type." (Reused the naming convention from an earlier project, the description doesn't need to be precious, it just needs to be obvious to the next person who opens it.)
+Here's what that setup actually looks like in EDM — this particular screenshot is from a different, more recent engagement (not the retail one, just a reference example), but it shows exactly the configuration I mean: name the node type, set the Node Type Class to **Legacy GL**, and give it a description that's blunt about what it's for, so nobody's confused six months later about why it exists.
 
-![GlMappingLegacy node type configuration showing Node Type Class set to Legacy GL](/images/edm-legacy-node/glmapping-node-type.png)
+![Example of a node type configured with Node Type Class set to Legacy GL](/images/edm-legacy-node/glmapping-node-type.png)
 
 That one field — Node Type Class set to Legacy GL instead of Normal — is the entire trick. Everything else about setting it up is identical to creating a regular node type.
 
