@@ -24,11 +24,11 @@ The instinct is to just load the entire legacy EBS structure straight into EDM a
 
 I set up a Legacy GL node type and loaded the EBS COA into it exactly as it existed in the source system — same segment values, same combinations, same naming quirks, no cleanup. The point wasn't to make it pretty. The point was to have an accurate, queryable copy of the legacy structure sitting in EDM, available for mapping and validation, without it costing anything against the subscription.
 
-Here's what that setup actually looks like in EDM — this particular screenshot is from a different, more recent engagement (not the retail one, just a reference example), but it shows exactly the configuration I mean: name the node type, set the Node Type Class to **Legacy GL**, and give it a description that's blunt about what it's for, so nobody's confused six months later about why it exists.
+Here's what that setup actually looks like in EDM — this particular screenshot is from a different, more recent engagement (not the retail one, just a reference example), but it shows exactly the configuration I mean. When you create the node type, you pick the dimension it belongs to, give it a name and description, and — this is the step that matters — choose **Legacy GL** as the Node Type Class right there at creation, instead of leaving it as Normal.
 
 ![Example of a node type configured with Node Type Class set to Legacy GL](/images/edm-legacy-node/glmapping-node-type.png)
 
-That one field — Node Type Class set to Legacy GL instead of Normal — is the entire trick. Everything else about setting it up is identical to creating a regular node type.
+That one choice at creation time — Legacy GL instead of Normal — is the entire trick. Everything else about setting it up is identical to creating a regular node type.
 
 The new Fusion Cloud COA stayed a Normal node type, the way any production hierarchy should — that one's permanent, gets real governance applied to it, and rightly counts against the license.
 

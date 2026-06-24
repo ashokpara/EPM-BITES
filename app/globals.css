@@ -212,6 +212,16 @@ a {
   padding-bottom: 5rem;
 }
 
+.post-content img {
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  margin: 1.5rem 0;
+  display: block;
+}
+
 .post-content h1,
 .post-content h2,
 .post-content h3 {
