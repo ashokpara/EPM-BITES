@@ -50,7 +50,7 @@ Here's a concrete example. When I pointed the autonomous agent at a real environ
 
 And when it rolled all of that up into a final "Key Findings" summary, it didn't soften anything — it just named who was actively sitting on the data and how old the oldest drafts were:
 
-![Agent-generated key findings summarizing real workflow ownership and recent activity across the environment](/images/edm-ai-chatbot/agent-key-findings-redacted.png)
+![Agent-generated key findings summarising real workflow ownership and recent activity across the environment](/images/edm-ai-chatbot/agent-key-findings-redacted.png)
 
 Neither of those is a flaw in the tool. That's the tool doing exactly its job — reporting what's actually in the system. Whether that's a comfortable thing to read back depends entirely on how well the underlying data and process discipline have been maintained, not on anything the AI did.
 
