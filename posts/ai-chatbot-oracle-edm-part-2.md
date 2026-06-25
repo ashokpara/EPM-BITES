@@ -1,6 +1,6 @@
 ---
 title: "I Built an AI Chatbot for Oracle EDM (Part 2 of 2) — What Actually Makes It Work"
-date: "2026-06-19"
+date: "2026-06-25"
 excerpt: "The AI model was the easy part. Part 2 is about the real foundation: a flexible REST API, clean metadata, and why Oracle EDM's real job goes well beyond EPM."
 ---
 

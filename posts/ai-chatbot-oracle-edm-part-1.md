@@ -1,6 +1,6 @@
 ---
 title: "I Built an AI Chatbot for Oracle EDM (Part 1 of 2) — Here's What Actually Happened"
-date: "2026-06-18"
+date: "2026-06-24"
 excerpt: "I connected an AI agent to Oracle's EDM REST API to see what would happen. Part 1 covers why I built it, what Oracle EDM really is, and how the thing actually works."
 ---
 
