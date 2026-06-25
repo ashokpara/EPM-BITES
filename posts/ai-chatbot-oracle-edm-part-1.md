@@ -6,9 +6,9 @@ excerpt: "I connected an AI agent to Oracle's EDM REST API to see what would hap
 
 # I Built an AI Chatbot for Oracle EDM (Part 1 of 2) — Here's What Actually Happened
 
-Full disclosure up front, because I'd rather you know this before you read another word: I built this on a free afternoon, mostly out of curiosity about how far AI agents have come, not because I think it belongs anywhere near production. Oracle shipped a genuinely serious AI-powered change management agent as part of their June 2026 EPM release — built by people who actually work on the platform, tested at enterprise scale, backed by an SLA. What I built is a couple of Python scripts. I'm not trying to compete with Oracle's release, and if you came here looking for a replacement for it, this isn't that.
+Full disclosure up front, because I'd rather you know this before you read another word: I built this with some free time, mostly out of curiosity about how far AI agents have come, not because I think it belongs anywhere near production. Oracle shipped a genuinely serious AI-powered change management agent as part of their June 2026 EPM release — built by people who actually work on the platform, tested at enterprise scale, backed by an SLA. What I built is a couple of Python scripts. I'm not trying to compete with Oracle's release, and if you came here looking for a replacement for it, this isn't that.
 
-What I am trying to do is show you something I think is genuinely interesting: how little code it now takes to wire a real AI model into a real enterprise system and get something useful out of it. A few years ago this would have been a multi-month integration project with a dedicated team. I did it in an afternoon, with two scripts, using off-the-shelf tools. That gap closing is the actual story here, and I think it's worth understanding regardless of whether you ever touch my code.
+What I am trying to do is show you something I think is genuinely interesting: how little code it now takes to wire a real AI model into a real enterprise system and get something useful out of it. A few years ago this would have been a multi-month integration project with a dedicated team. I did it in some free time, with two scripts, using off-the-shelf tools. That gap closing is the actual story here, and I think it's worth understanding regardless of whether you ever touch my code.
 
 So let's talk about what I built, and more importantly, about the system I built it on top of — because Oracle EDM deserves a bit more credit than people usually give it.
 
@@ -26,7 +26,7 @@ I mention this because it reframes what this whole project is actually about. I 
 
 I'll be honest about the motivation, because I think pretending otherwise would undercut the whole point of writing this. I didn't sit down because some EPM team came to me with a business case. I sat down because I wanted to see, hands-on, what current AI models can actually do with tool use when pointed at a real, gnarly enterprise REST API — not a toy API, not a demo sandbox, the real thing with real auth quirks and real inconsistent field names.
 
-Two things came out of that afternoon: a chatbot you can talk to, and an agent that runs on its own and writes you a report. Different tools, different jobs, same underlying idea.
+Two things came out of that time: a chatbot you can talk to, and an agent that runs on its own and writes you a report. Different tools, different jobs, same underlying idea.
 
 ### The Chatbot — `epm_chat.py`
 

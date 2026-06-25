@@ -80,7 +80,7 @@ A few honest next steps, roughly in order of how much I think they'd matter:
 
 ## The Honest Conclusion
 
-Oracle's June 2026 AI change management release is the real story here, not anything I built. Their team did the hard part: integrating AI reasoning into a platform that actually governs financial data, with the security and platform trust that requires. What I built is a much smaller thing — a demonstration of the underlying pattern, built in an afternoon, with two scripts and a couple of API keys.
+Oracle's June 2026 AI change management release is the real story here, not anything I built. Their team did the hard part: integrating AI reasoning into a platform that actually governs financial data, with the security and platform trust that requires. What I built is a much smaller thing — a demonstration of the underlying pattern, built with some free time, with two scripts and a couple of API keys.
 
 But the pattern is worth understanding on its own terms, separate from any one vendor's product. The barrier between "there's a REST API" and "I can just ask it things in plain English" has basically disappeared, provided the API is flexible enough and the data behind it is clean enough. Oracle EDM, when it's well-governed, clears both bars easily. Most enterprise systems still don't.
 
