@@ -4,8 +4,6 @@ date: "2026-06-24"
 excerpt: "I connected an AI agent to Oracle's EDM REST API to see what would happen. Part 1 covers why I built it, what Oracle EDM really is, and how the thing actually works."
 ---
 
-# I Built an AI Chatbot for Oracle EDM (Part 1 of 2) — Here's What Actually Happened
-
 Full disclosure up front, because I'd rather you know this before you read another word: I built this with some free time, mostly out of curiosity about how far AI agents have come, not because I think it belongs anywhere near production. Oracle shipped a genuinely serious AI-powered change management agent as part of their June 2026 EPM release — built by people who actually work on the platform, tested at enterprise scale, backed by an SLA. What I built is a couple of Python scripts. I'm not trying to compete with Oracle's release, and if you came here looking for a replacement for it, this isn't that.
 
 What I am trying to do is show you something I think is genuinely interesting: how little code it now takes to wire a real AI model into a real enterprise system and get something useful out of it. A few years ago this would have been a multi-month integration project with a dedicated team. I did it in some free time, with two scripts, using off-the-shelf tools. That gap closing is the actual story here, and I think it's worth understanding regardless of whether you ever touch my code.
