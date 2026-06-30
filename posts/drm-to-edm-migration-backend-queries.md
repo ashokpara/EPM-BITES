@@ -18,11 +18,18 @@ One caveat before we get into it: these are direct, read-only queries against th
 
 ## A Quick Word on the DRM Migration Utility
 
-Before we get into the SQL — Oracle does ship a dedicated migration tool for DRM. It runs on its own URL, separate from the DRM web client entirely, and it's actually a solid tool for what it does: you select the objects you want to migrate, it pulls in all the dependencies automatically, and it handles the packaging. If you're doing a structured migration of DRM configuration objects, that utility is the right starting point and worth getting familiar with.
+Before we get into the SQL — Oracle does ship a dedicated migration tool for DRM, and it's worth knowing about it. It runs on its own separate URL from the DRM web client, and once you log in you get four straightforward options:
 
-What the back-end queries below give you is something different — speed and visibility during the discovery and research phase that happens before you're ready to migrate anything. The Migration Utility tells you how to move objects. The `RM_DB` schema tells you what's actually in there, what it connects to, and whether anyone's actually using it. Those are different questions, and in my experience the second set of questions is the one that takes the most time — and the one the GUI makes hardest to answer quickly.
+- **Extract** — pull metadata objects out of a DRM system to a file, for backup, auditing, or loading into another system
+- **Load** — push a metadata objects file into a DRM system (Dev to Prod, for example); existing objects with the same name get updated
+- **Difference** — compare metadata objects between two sources, see what's different, optionally generate a file with just the deltas; useful for undoing unauthorized changes or spotting misconfigured objects
+- **View File** — browse, search, and inspect a metadata objects file without loading it anywhere
 
-The two complement each other. The SQL gets you to a clear, verified picture of the environment fast. The Migration Utility moves it once you know what you're moving.
+It's a genuinely solid tool for what it does. If you're moving DRM configuration objects between environments — hierarchy definitions, workflow models, export configurations — the Migration Utility is the right way to do it.
+
+What the back-end queries below give you is something different: visibility during the discovery and research phase, before you're ready to migrate anything. The Migration Utility moves objects. The back-end schema tells you what's actually in there, what it connects to, and whether it's even worth moving. Those are different questions, and the second set is usually the one that takes the most time — especially if you're coming into a DRM environment you didn't build yourself.
+
+The two work together. The SQL gets you a clear, verified picture of the environment. The Migration Utility moves it once you know what you're dealing with.
 
 ## Why the GUI Falls Short for Discovery
 
