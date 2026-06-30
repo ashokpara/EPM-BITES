@@ -25,7 +25,15 @@ Before we get into the SQL — Oracle does ship a dedicated migration tool for D
 - **Difference** — compare metadata objects between two sources, see what's different, optionally generate a file with just the deltas; useful for undoing unauthorized changes or spotting misconfigured objects
 - **View File** — browse, search, and inspect a metadata objects file without loading it anywhere
 
+![Oracle DRM Migration Utility — main task selection screen showing Extract, Load, Difference, and View File options](/images/drm-migration-utility/drm-migration-utility-tasks.png)
+
+*Oracle DRM Migration Utility — the main screen after login. Four tasks, clearly separated. Most migration work lives in Extract and Load.*
+
 It's a genuinely solid tool for what it does. Once you pick Extract or Load, it presents a tree of object categories to choose from — Books, Exports, External Connections, Node Access Groups, Node Types, Object Access Groups, Property Categories, Property Definitions, Queries, Hierarchy Groups, System Preferences, Validations, and Version Variables. You select what you need, it resolves the dependencies, and packages it up. If you're moving DRM configuration objects between environments, this is the right way to do it.
+
+![Oracle DRM Migration Utility — object category selection tree](/images/drm-migration-utility/drm-migration-utility-objects.png)
+
+*The object selection screen — every major DRM configuration category is here. Select what you need, and the utility handles dependency resolution before packaging.*
 
 What the back-end queries below give you is something different: visibility during the discovery and research phase, before you're ready to migrate anything. The Migration Utility moves objects. The back-end schema tells you what's actually in there, what it connects to, and whether it's even worth moving. Those are different questions, and the second set is usually the one that takes the most time — especially if you're coming into a DRM environment you didn't build yourself.
 
