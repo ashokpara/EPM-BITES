@@ -1,7 +1,7 @@
 ---
 title: "Migrating Legacy Oracle DRM to EDM? Read the Back End First — Here's the Query Toolkit That Saved Me Weeks"
 date: "2026-06-25"
-excerpt: "Oracle DRM's GUI was never built for migration discovery. Here's the back-end SQL toolkit I built over years of running DRM, and how to use it to actually plan a clean cutover to Oracle EDM."
+excerpt: "The Oracle DRM Migration Utility handles the move — but reading the back-end schema directly is what gives you the full picture fast. A practical SQL toolkit that's just as useful if you're new to DRM as it is if you've been running it for years."
 ---
 
 If you've ever tried to plan a migration off legacy Oracle DRM onto Oracle EDM, you already know the problem: the DRM web client is fine for day-to-day stewardship, but it's a genuinely terrible tool for answering the questions a migration actually needs answered.
