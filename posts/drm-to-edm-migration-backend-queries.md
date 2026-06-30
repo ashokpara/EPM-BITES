@@ -4,7 +4,7 @@ date: "2026-06-30"
 excerpt: "The Oracle DRM Migration Utility handles the move — but reading the back-end schema directly is what gives you the full picture fast. A practical SQL toolkit that's just as useful if you're new to DRM as it is if you've been running it for years."
 ---
 
-If you've ever tried to plan a migration off legacy Oracle DRM onto Oracle EDM, you already know the problem: the DRM web client is fine for day-to-day stewardship, but it's a genuinely terrible tool for answering the questions a migration actually needs answered.
+If you've ever tried to plan a migration off legacy Oracle DRM onto Oracle EDM, you already know the problem: the DRM web client is fine for day-to-day stewardship, but it was never designed to answer the questions a migration actually needs answered.
 
 How many node types do we have, and what properties are attached to each? Which exports are actually feeding a downstream system, and which ones haven't run in two years? Who has access to what, across every hierarchy, and through which AD groups? None of that is a few clicks away. Most of it isn't reachable through the UI at all.
 
