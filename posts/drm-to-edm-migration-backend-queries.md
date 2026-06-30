@@ -4,23 +4,29 @@ date: "2026-06-25"
 excerpt: "Oracle DRM's GUI was never built for migration discovery. Here's the back-end SQL toolkit I built over years of running DRM, and how to use it to actually plan a clean cutover to Oracle EDM."
 ---
 
-If you've ever tried to plan a migration off legacy Oracle Data Relationship Management (DRM) onto Oracle Enterprise Data Management (EDM), you've probably hit the same wall I did: the DRM web client is a fine tool for day-to-day stewardship, but it is a genuinely terrible tool for answering the questions a migration actually needs answered. "How many node types do we have, and what properties are attached to each?" "Which exports actually feed a downstream table, and which ones are dead?" "Who has access to what, across every hierarchy?" None of that is one click away. Most of it isn't reachable through the UI at all.
+If you've ever tried to plan a migration off legacy Oracle DRM onto Oracle EDM, you already know the problem: the DRM web client is fine for day-to-day stewardship, but it's a genuinely terrible tool for answering the questions a migration actually needs answered.
 
-So over a few years of running DRM as a day-to-day admin, I built up a personal library of SQL that reads directly from the DRM back-end schema (`RM_DB`). It started as convenience — the GUI just wasn't fast enough for daily admin work — but it turned out to be exactly the toolkit you need when the real question becomes "how do we move everything in here to EDM without missing something important."
+How many node types do we have, and what properties are attached to each? Which exports are actually feeding a downstream system, and which ones haven't run in two years? Who has access to what, across every hierarchy, and through which AD groups? None of that is a few clicks away. Most of it isn't reachable through the UI at all.
 
-This article is that toolkit, organized around an actual migration plan rather than just a pile of queries. The SQL below uses illustrative table, hierarchy, and export names — swap in your own — but the underlying `RM_DB` schema objects (`RM_NODE`, `RM_HIERARCHY`, `RM_EXPORT`, `RM_ACCESS_GROUP_DEFINITION`, and so on) are Oracle's actual DRM data model, so the queries will work against any DRM instance with minimal adjustment.
+So over a few years of running DRM as a hands-on admin, I built up a library of SQL that goes straight to the back-end schema — `RM_DB`. It started because the GUI just wasn't fast enough for daily work. But it turned out to be exactly what I needed when the real question became: how do we move everything in here to EDM without leaving something behind?
 
-A quick caveat before we start: these are direct, read-only queries against the DRM database schema, not anything exposed or supported through Oracle's official API. Treat this as an internal discovery and audit technique — run it against a non-production copy where you can, get DBA sign-off for read access, and never run anything beyond a `SELECT` against a live production DRM instance.
+This is that toolkit, organized around how a migration actually unfolds rather than just a pile of queries. The table and hierarchy names below are illustrative — swap in your own — but the `RM_DB` schema objects themselves (`RM_NODE`, `RM_HIERARCHY`, `RM_EXPORT`, `RM_ACCESS_GROUP_DEFINITION`, and so on) are Oracle's actual DRM data model. These queries will work against any DRM instance with minimal adjustment.
+
+One caveat before we get into it: these are direct, read-only queries against the DRM database schema, not anything exposed through Oracle's official API. Treat this as an internal discovery technique. Run it against a non-production copy if you can, get DBA sign-off for read access, and keep it strictly to `SELECT`. Nothing here writes anything.
+
+---
 
 ## Why the GUI Fails You Here
 
-DRM's web client is built around browsing one hierarchy, one version, one node at a time. A migration needs the opposite view: every hierarchy at once, every node type and its properties at once, every export and what it actually feeds, every security group and who's in it. That's an inventory problem, not a browsing problem, and DRM's `RM_DB` schema is a relational database — which means it answers inventory questions in seconds once you know where to look.
+DRM's web client is built for browsing — one hierarchy, one version, one node at a time. A migration needs the opposite: every hierarchy at once, every node type and its properties, every export and what it actually feeds, every security group and who's in it. That's an inventory problem, and DRM's `RM_DB` is a relational database. Which means it answers inventory questions in seconds, once you know where to look.
 
-## The Discovery Phase: What Actually Exists
+---
 
-Before you can map anything to EDM, you need a complete, accurate inventory of what's actually in the legacy system — not what the documentation says is in there, which is almost always stale.
+## Start Here: What's Actually in the System
 
-**Node types and properties.** This is the single most useful query in the whole toolkit, because it's the direct input to your EDM node type and property design:
+The first thing I do before touching any EDM configuration is get a complete, accurate picture of what's in the legacy system — not what the documentation says is there, which is almost always out of date.
+
+**Node types and properties** is the single most useful query in the whole toolkit. It's the direct input to your EDM node type and property design:
 
 ```sql
 SELECT DISTINCT
@@ -39,9 +45,9 @@ WHERE P.I_PROPERTY_ID = NTP.I_PROPERTY_ID
   AND NT.I_NODE_TYPE_ID = NTP.I_NODE_TYPE_ID;
 ```
 
-Run this once and you have, in a spreadsheet, every node type in the system and every property attached to it — including whether the property is a formula, a script-derived value, or a plain attribute. This is exactly the shape of decision EDM asks you to make for every dimension you build: what properties does this node type need, and what type is each one?
+Run this and you get, in a spreadsheet, every node type and every property attached to it — including whether the property is a formula, a script-derived value, or a plain attribute. That `C_DERIVER_CLASS` column is worth paying close attention to, and I'll come back to it.
 
-**Property categories.** DRM groups properties into categories for security and organizational purposes, and this often maps directly onto how you'll want to organize access and edit permissions in EDM:
+**Property categories** — DRM groups properties into categories for security and organizational purposes, and this often maps directly onto how you'll want to organize access and edit permissions in EDM:
 
 ```sql
 SELECT DISTINCT
@@ -57,7 +63,7 @@ WHERE PC.I_CATEGORY_ID = CAT.I_CATEGORY_ID
 ORDER BY 4, 1;
 ```
 
-**Hierarchies and node counts.** You need a real number for how big each hierarchy actually is, by version, before you can plan extraction batches or estimate EDM load times:
+**Hierarchy node counts** — you need real numbers before you can estimate extraction batches or EDM load times:
 
 ```sql
 SELECT DISTINCT
@@ -71,9 +77,9 @@ WHERE B.I_VERSION_ID = :working_version_id
 GROUP BY B.I_VERSION_ID, B.C_ABBREV;
 ```
 
-Run that against both your working version and your current (production) version, and you immediately know whether there's drift between them that needs to be reconciled before migration — a surprisingly common gap that nobody notices until cutover week.
+Run that against both your working version and your current production version. In my experience there's almost always drift between them that nobody's noticed, and you'd rather find it now than during cutover week.
 
-**Top node and hierarchy structure.** Useful for confirming your hierarchy inventory matches what stakeholders believe exists:
+**Top node and hierarchy structure** — useful for a quick sanity check that your hierarchy inventory matches what stakeholders think exists:
 
 ```sql
 SELECT DISTINCT
@@ -88,11 +94,13 @@ WHERE A.I_VERSION_ID = B.I_VERSION_ID
   AND B.C_ABBREV = :version_label;
 ```
 
+---
+
 ## The Integration Map: What Actually Depends on This Data
 
-This is the phase migrations most often get wrong, because it's invisible from the GUI: DRM exports feed downstream systems, and if you don't know which exports are live and what they feed, you will break something during cutover that nobody remembers existed.
+This is the phase migrations most often get wrong, because it's invisible from the GUI. DRM exports feed downstream systems, and if you don't know which ones are live and what they're actually feeding, you will break something during cutover that nobody remembers exists.
 
-**Full export inventory with target tables.** This single query is worth the entire toolkit on its own:
+**Full export inventory with target tables** — this one query is worth the entire toolkit on its own:
 
 ```sql
 SELECT DISTINCT
@@ -114,9 +122,9 @@ WHERE EN.I_EXPORT_ID = EC.I_EXPORT_ID
 ORDER BY E.C_EXPORT_ABBREV;
 ```
 
-Every row in the result is a live integration point: an export feeding a real downstream table somewhere — a data warehouse staging table, a reporting layer, a consolidation system. Before you stand up EDM, every one of these needs a decision: does this integration get rebuilt as an EDM export, does it get retired because the downstream system is also being decommissioned, or does it need a bridge during the transition period?
+Every row in that result is a live integration point — an export that's landing in a real downstream table somewhere. A data warehouse staging area, a reporting layer, a consolidation system. Before you stand up EDM, every one of these needs a decision: does this get rebuilt as an EDM export, does it get retired because the downstream system is going away too, or does it need a bridge while both systems are running in parallel?
 
-**Export-to-book mapping with full property detail**, for exports organized under DRM "books" (commonly used for general ledger or ERP-bound feeds):
+**Export-to-book mapping**, for exports bundled under DRM books — commonly used for GL or ERP feeds:
 
 ```sql
 SELECT DISTINCT
@@ -135,13 +143,15 @@ WHERE E.I_EXPORT_ID = EC.I_EXPORT_ID
   AND E.C_EXPORT_ABBREV LIKE :export_name_pattern;
 ```
 
-This is particularly valuable when you're consolidating multiple legacy GL feeds into a single EDM-managed chart of accounts — it shows you exactly which properties each book-organized export pulls, so you can confirm the new EDM export design captures everything the old one did.
+This is particularly useful when you're consolidating multiple legacy GL feeds — it shows you exactly which properties each book-organized export pulls, so you can confirm your new EDM export design captures everything the old one did.
 
-## The Security Model: What Has to Be Rebuilt
+---
 
-Security in DRM is organized around Node Access Groups (local and global) and Workflow Access Groups, each tied to Active Directory group membership. None of this carries over automatically — EDM has its own access group model — so you need a complete export of who has access to what before you can design the equivalent structure in EDM.
+## Security: What Has to Be Rebuilt
 
-**Local node access, with hierarchy and node context** — this is the one that actually tells you *what* a group has access to, not just that the group exists:
+DRM security runs on Node Access Groups — local and global — and Workflow Access Groups, all tied to Active Directory group membership. None of it carries over automatically. EDM has its own access model, and it works differently, so you need a complete export of who has access to what before you can design the equivalent structure in EDM.
+
+**Local node access with hierarchy and node context** — this is the one that tells you *what* a group can actually touch, not just that the group exists:
 
 ```sql
 SELECT DISTINCT
@@ -171,9 +181,9 @@ WHERE G.I_SECURITY_ID = GL.I_SECURITY_ID
 ORDER BY G.C_ABBREV, H.C_ABBREV;
 ```
 
-Run the same pattern against `RM_ACCESS_GROUP_PROP_GLOBAL` for global node access groups, since global and local access are stored separately and both need to be captured.
+Run the same pattern against `RM_ACCESS_GROUP_PROP_GLOBAL` for global NAGs — global and local access are stored separately and you need both.
 
-**Active, non-locked users with their roles** — your actual user provisioning list for the new system:
+**Active users with their DRM roles** — your provisioning list for the new system:
 
 ```sql
 SELECT DISTINCT
@@ -190,13 +200,15 @@ WHERE U.I_USER_ID = UR.I_USER_ID
 ORDER BY U.I_USER_ID;
 ```
 
-This becomes the master list you reconcile against EDM's user/role provisioning before go-live — anyone active in DRM who isn't accounted for in the EDM access design is a gap that will surface as a support ticket in week one.
+Anyone active in DRM who isn't accounted for in your EDM access design is a gap that surfaces as a support ticket in week one. Better to find them now.
 
-## The Business Logic: Workflow Models, Tasks, and Validations
+---
 
-This is the part of a DRM environment that's easiest to forget entirely, because it lives almost entirely in configuration rather than data — and it's exactly the kind of business logic that determines whether your EDM workflow design actually matches how the business works today.
+## Workflow and Business Logic
 
-**Workflow models, tasks, and the node access groups assigned to each stage:**
+This is the part of a DRM environment that's easiest to overlook entirely, because it lives in configuration rather than data. And it's exactly the kind of thing that determines whether your EDM workflow design actually matches how the business works today.
+
+**Workflow models, stages, tasks, and assigned groups:**
 
 ```sql
 SELECT DISTINCT
@@ -219,7 +231,7 @@ WHERE A.I_MODEL_ID = B.I_MODEL_ID
 ORDER BY 1;
 ```
 
-**Validations attached to each workflow task**, which tells you exactly what business rules fire at each step — these are the rules you need to either replicate in EDM's validation framework or consciously decide to retire:
+**Validations per workflow task** — these are the business rules that fire at each step:
 
 ```sql
 SELECT DISTINCT
@@ -236,29 +248,35 @@ WHERE A.I_TASK_ID = B.I_TASK_ID
   AND A.I_TASK_VALIDATION_ID = E.I_TASK_VALIDATION_ID;
 ```
 
-Every validation rule you find here is a business requirement that existed for a reason — usually because something broke once, and a validation got added so it would never break that way again. Don't treat these as legacy clutter to skip; treat them as a list of lessons the business already paid to learn.
+Every validation rule you find here exists because something broke once and someone decided it shouldn't break that way again. Don't treat them as legacy noise to skip — treat them as a list of lessons the business already paid to learn.
 
-## What Doesn't Translate 1:1 — and Why That's Actually Fine
+---
 
-Before getting into what doesn't carry over, it's worth saying plainly: DRM earned its reputation honestly. For the better part of two decades, it was the champion of data relationship governance — long before "master data management" was a budget line item anywhere, DRM was already doing version-controlled hierarchy management, node-level workflow, and granular security with a depth that competing tools didn't match. One of its most underrated strengths is its derived property engine: DRM lets administrators write genuine JavaScript formulas directly against a property, giving you real custom derivation logic — conditional values, cross-property calculations, string manipulation — executed server-side whenever the property is evaluated, all without leaving the DRM configuration layer. That's a serious governance capability, and it's a big part of why DRM environments accumulate so much custom business logic over the years: the tool made it easy to encode real institutional knowledge directly into the data model.
+## What Doesn't Carry Over — and Why That's Fine
 
-What DRM was never built for is the cloud-native world EDM lives in. It's an on-premises-era architecture, and it shows in exactly the place you'd expect: integration. DRM was never designed for seamless cloud integration — connecting natively to cloud ERP, cloud EPM, and modern REST-based ecosystems the way EDM does out of the box. That gap, not a governance or capability gap, is the real reason organizations migrate. So this section isn't a list of things DRM did wrong — it's a list of things that have to be deliberately redesigned because the underlying architecture EDM runs on is genuinely different, not worse.
+Before I get into the specifics, I want to say something clearly: DRM earned its reputation. For the better part of two decades, it was the benchmark for data relationship governance — before "master data management" was even a standard budget line item, DRM was already doing version-controlled hierarchy management, node-level workflow, and granular security at a depth that competing tools didn't come close to matching.
 
-**JavaScript-derived properties don't carry over as-is, because EDM's rules model works differently.** That `C_DERIVER_CLASS` column you saw in the node type/property query is the visible trace of this capability — every property with custom JavaScript-based derivation logic attached to it. It's powerful, and often years of carefully tuned business logic live in those formulas. EDM's validation and rules framework is deliberately more declarative and constrained — by design, for governance and auditability reasons in a multi-tenant cloud environment, not because EDM lacks the sophistication DRM had. If you've got custom JavaScript derivation logic in production, budget real time to either reimplement the logic as an EDM validation rule, push it upstream into the source system, or — for genuinely complex cases — handle it in an external script that runs against the EDM REST API. Don't assume it migrates as-is; assume it gets faithfully rebuilt, and scope accordingly.
+One of its most underrated strengths is its derived property engine. DRM lets administrators write real JavaScript formulas directly against a property — conditional values, cross-property calculations, string manipulation — all running server-side whenever the property is evaluated, without ever leaving the DRM configuration layer. That `C_DERIVER_CLASS` column you saw earlier is the trace of that capability. Those formulas often represent years of carefully encoded institutional knowledge about how data should behave, and they're one of the reasons DRM environments accumulate so much custom business logic over time: the tool made it genuinely easy to model real governance rules directly in the data layer.
 
-**Global vs. local node access groups map to a different security model, not just different terminology.** DRM splits access into global groups (apply everywhere) and local groups (scoped to a specific hierarchy and node), each independently joinable to AD groups. EDM's access model is organized differently — around applications, dimensions, and roles rather than DRM's global/local node split. The practical effect is that you can't export your DRM security tables and import them; you have to take the *intent* behind each access grant (who should be able to edit what, and where) and re-derive an EDM-native group structure from scratch. This is exactly why the security export queries above capture the hierarchy and node context, not just the group name — you need that context to reconstruct intent, because the literal group definitions won't carry over.
+Where DRM shows its age isn't capability — it's connectivity. It was designed for an on-premises world, and the gap that drives most migrations today is cloud integration: connecting natively to cloud ERP, cloud EPM, and REST-based ecosystems the way EDM does out of the box. That's the real reason organisations move, not because DRM couldn't govern data — it absolutely could — but because the world it was built for has changed. So what follows isn't a list of DRM failures. It's a list of things that need a fresh design because the architecture underneath has shifted.
 
-**Workflow stage structure is conceptually similar but mechanically different.** Both systems have multi-stage approval workflows with assigned groups per stage, but DRM's model (`RM_WF_MODEL` → stages → tasks → validations) and EDM's request/viewpoint workflow model aren't structurally identical. A workflow that took three custom stages to model in DRM might collapse into a single EDM viewpoint with built-in validations, or might need to expand if EDM's stage model handles something DRM's didn't. Treat the workflow extraction queries as a requirements document, not a configuration to transcribe — ask what each stage was actually trying to accomplish, then design that intent natively in EDM rather than mimicking DRM's stage count and shape.
+**JavaScript-derived properties don't port as-is.** EDM's validation and rules model is more declarative by design — built for a multi-tenant cloud environment where auditability and governance of the rules themselves matters, not just the data. Any property with custom derivation logic needs to be reimplemented: either as an EDM validation rule, pushed upstream into the source system, or handled in an external script against the EDM REST API for genuinely complex cases. Budget real time for this. These aren't configurations you can lift-and-shift; they're logic that needs to be faithfully rebuilt.
 
-**Books and export bundling are a DRM-specific construct.** The "book" concept — bundling several exports together for a combined GL/ERP feed — doesn't have a named equivalent in EDM. EDM handles multi-export delivery through its own export and connection framework, which is structured differently. If your downstream consumers depend on the bundled delivery behavior books provide (not just the data, but the packaging and timing), that's a design conversation with whoever owns the receiving system, not a configuration setting you flip in EDM.
+**Global and local NAGs map to a different security model, not just different names.** DRM's global/local split — each independently joinable to AD groups — doesn't have a direct equivalent in EDM's application, dimension, and role-based access model. You can't export your DRM security tables and import them anywhere useful. What you can do is use the access queries above to capture the *intent* behind each grant — who should be able to edit what, and where — and rebuild that intent natively in EDM. The literal group definitions won't carry over, but the design logic behind them can.
 
-None of this is a strike against DRM, and it's not a strike against EDM either. DRM did its job — genuinely well — for the era and the architecture it was built on. The redesign work above exists because you're moving from an on-premises governance tool to a cloud-native one, and cloud-native integration was never what DRM was asked to do. The silver lining is that the redesign is usually a chance to retire workarounds that only existed because DRM's older architecture forced your hand, and to gain the seamless cloud connectivity that was the actual reason for the move in the first place. But it does mean a chunk of what your discovery queries surface isn't "migrate this," it's "decide what this should become." Plan the schedule accordingly, and flag these categories to stakeholders early, before anyone assumes the cutover is a configuration exercise.
+**Workflow stage structure needs a redesign, not a transcript.** Both systems do multi-stage approvals with assigned groups, but DRM's stage/task/validation model and EDM's request-and-viewpoint framework aren't structurally the same. A workflow that took three custom stages in DRM might collapse into a single EDM viewpoint with built-in validations, or might need more stages if EDM's model handles something DRM's didn't. Use the workflow queries as a requirements document — ask what each stage was trying to accomplish, then design that intent in EDM rather than trying to mirror the old stage count.
 
-## The Open Work: What Can't Be Frozen on Cutover Day
+**Books and export bundling are DRM-specific.** The "book" concept — bundling several exports into a combined GL/ERP feed — doesn't have a named equivalent in EDM. EDM handles multi-export delivery through its own export and connection framework, which works differently. If your downstream consumers depend on the bundled delivery behavior, that's a design conversation with the receiving system team, not a setting you flip in EDM.
 
-A migration has a cutover date, but DRM doesn't stop accumulating in-flight work just because you've picked one. Before you can lock the legacy system, you need to know exactly what's still moving.
+None of this is a problem with either system. DRM did its job — genuinely well — for the era it was built in. The redesign work exists because you're moving from an on-premises governance tool to a cloud-native one, and cloud integration was never what DRM was asked to do. More often than not, the redesign is actually an opportunity: a chance to retire workarounds that only existed because DRM's older architecture forced your hand, and to gain the cloud connectivity that's the whole point of the move. But it does mean a chunk of what your discovery queries surface isn't "migrate this" — it's "decide what this should become." Get those categories in front of stakeholders early, before anyone assumes the cutover is a copy-paste exercise.
 
-**Requests that are neither committed nor rejected** — this is your literal "what's still open" list, and it should be empty (or fully accounted for) before the legacy system goes read-only:
+---
+
+## What Can't Be Frozen on Cutover Day
+
+A migration has a cutover date. DRM doesn't care. In-flight work keeps accumulating right up to the moment you lock the system, and if you're not tracking it, you'll find out about it from a frustrated user after go-live.
+
+**Everything that isn't committed or rejected yet:**
 
 ```sql
 SELECT DISTINCT
@@ -273,7 +291,9 @@ LEFT JOIN RM_DB.RM_WF_REQUEST R
 WHERE R.E_WORKFLOW_STATUS__CURRENT NOT IN ('Committed', 'Rejected');
 ```
 
-**Draft and pending requests by submitter**, for chasing down owners directly rather than broadcasting a generic "please finish your work" email to the whole organization:
+This should be empty — or fully accounted for — before the legacy system goes read-only.
+
+**Draft and pending requests by submitter**, so you can chase down actual owners directly rather than sending a generic "please close your open items" announcement that nobody reads:
 
 ```sql
 SELECT DISTINCT
@@ -294,9 +314,11 @@ WHERE A.I_WORKFLOW_REQUEST_ID = B.I_WORKFLOW_REQUEST_ID
 ORDER BY SUBMIT_DATE DESC;
 ```
 
-## The Audit Trail: Proving What Happened, When
+---
 
-Stakeholders will ask, during or after a migration, whether a given change happened before or after cutover, or whether a specific property was ever set a certain way historically. DRM's transaction history table is the answer, and it's worth pulling a clean extract before the legacy system is decommissioned, since this history doesn't automatically follow you into EDM.
+## The Audit Trail
+
+At some point during or after the migration, someone will ask whether a specific change happened before or after cutover, or whether a particular property was ever set to something historically. DRM's transaction history is the answer to that question — and it doesn't follow you into EDM automatically.
 
 ```sql
 SELECT
@@ -314,19 +336,23 @@ WHERE D_TIMESTAMP BETWEEN :start_date AND :end_date
 ORDER BY D_TIMESTAMP ASC;
 ```
 
-Export the full history, not just a recent window, and archive it somewhere durable before you decommission the legacy instance. Once that database is gone, this is gone with it.
+Pull the full history before you decommission the legacy instance. Once that database is gone, this is gone with it.
 
-## Putting It Together: A Migration Discovery Checklist
+---
 
-Strip away the SQL and what you actually have is a six-part discovery checklist, and I'd run it in roughly this order:
+## Putting It All Together
 
-1. **Inventory the metadata** — every node type, every property, every category, every hierarchy and its current node count. This becomes your EDM dimension and node type design input.
-2. **Map every integration** — every export, what it feeds, and whether that downstream system is staying, going, or needs a bridge. This is the single most common source of "surprise" outages in a DRM-to-EDM cutover.
-3. **Export the full security model** — every access group, every user, every role, mapped to actual hierarchy and node access. This becomes your EDM access group design input, and your user provisioning list.
-4. **Document the workflow business logic** — every workflow model, task, and validation rule. Each one represents a business requirement someone decided was worth enforcing; decide deliberately whether each one is rebuilt, simplified, or retired in EDM.
-5. **Flag what needs redesign, not migration** — deriver classes and scripted properties, global/local security mapping, workflow stage structure, and book-bundled exports all need a deliberate EDM-native design, not a lift-and-shift. Surface these to stakeholders early so they're scheduled as design work, not discovered as delays.
-6. **Close out open work and freeze the audit trail** — get every in-flight request to a terminal state, and archive transaction history before the legacy database disappears.
+Strip away the SQL and what you have is a six-part checklist. I'd run it in this order:
 
-None of this is exotic SQL. It's mostly inner joins across `RM_DB`'s core tables. But running it systematically, before you touch EDM configuration, turns a migration from "we think we know what's in here" into "we have a complete, query-verified inventory of everything in here" — and that difference is usually what separates a clean cutover from a multi-month string of post-go-live surprises.
+1. **Inventory the metadata** — every node type, property, category, hierarchy and node count. This is your EDM dimension and node type design input.
+2. **Map every integration** — every export, what it feeds, whether that downstream system is staying or going. This is the most common source of surprise outages in any DRM-to-EDM cutover.
+3. **Export the full security model** — every access group, user, and role, mapped to actual hierarchy and node access. This becomes your EDM access group design and your user provisioning list.
+4. **Document the workflow business logic** — every workflow model, task, and validation rule. Each one is a business requirement someone decided was worth enforcing. Decide deliberately whether each one gets rebuilt, simplified, or retired in EDM.
+5. **Flag what needs redesign** — derived property logic, global/local security mapping, workflow stage structure, and book-bundled exports all need a deliberate EDM-native design. Surface these to stakeholders early so they're scheduled as design work, not discovered as delays.
+6. **Close open work and archive the audit trail** — get every in-flight request to a terminal state, and pull the full transaction history before the database goes away.
 
-If you're planning a DRM-to-EDM migration and want to build this out further — automating the extraction into a structured handoff document, or turning it into a repeatable pre-migration audit script — that's a natural next step from here, and one I'd genuinely recommend over trying to do this discovery manually through the GUI.
+None of this is complicated SQL. It's mostly inner joins across `RM_DB`'s core tables. But running it systematically — before you touch EDM configuration — turns "we think we know what's in here" into "we have a verified inventory of everything in here." And that difference is usually what separates a clean cutover from three months of post-go-live surprises.
+
+---
+
+*Planning a DRM-to-EDM migration and want to talk through the discovery approach or build this out into a more automated audit script? Happy to dig into it — drop a comment or get in touch directly.*
