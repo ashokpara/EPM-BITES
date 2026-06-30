@@ -16,7 +16,15 @@ One caveat before we get into it: these are direct, read-only queries against th
 
 ---
 
-## Why the GUI Fails You Here
+## A Quick Word on the DRM Migration Utility
+
+Before we get into the SQL — Oracle does ship a dedicated migration tool for DRM. It runs on its own URL, separate from the DRM web client entirely, and it's actually a solid tool for what it does: you select the objects you want to migrate, it pulls in all the dependencies automatically, and it handles the packaging. If you're doing a structured migration of DRM configuration objects, that utility is the right starting point and worth getting familiar with.
+
+What the back-end queries below give you is something different — speed and visibility during the discovery and research phase that happens before you're ready to migrate anything. The Migration Utility tells you how to move objects. The `RM_DB` schema tells you what's actually in there, what it connects to, and whether anyone's actually using it. Those are different questions, and in my experience the second set of questions is the one that takes the most time — and the one the GUI makes hardest to answer quickly.
+
+The two complement each other. The SQL gets you to a clear, verified picture of the environment fast. The Migration Utility moves it once you know what you're moving.
+
+## Why the GUI Falls Short for Discovery
 
 DRM's web client is built for browsing — one hierarchy, one version, one node at a time. A migration needs the opposite: every hierarchy at once, every node type and its properties, every export and what it actually feeds, every security group and who's in it. That's an inventory problem, and DRM's `RM_DB` is a relational database. Which means it answers inventory questions in seconds, once you know where to look.
 
