@@ -226,6 +226,33 @@ The economics of this model need to be evaluated against the full breadth of EPM
 
 ---
 
+## How to Check Your Actual Record Count in Oracle EDM
+
+Before you can evaluate which licensing model makes sense, you need to know your actual record count. Oracle EDM makes this straightforward — but there is a distinction in the report that matters for licensing purposes, and it is easy to misread.
+
+There are two ways to get to this number, and it is worth knowing the difference between them.
+
+**Option 1 — Reports → Record Count Log (System section, left-hand navigation)**
+
+This is the full report. It shows your record count and node count broken down by Application and Dimension, with a Record Count Contribution column for each. Use this when you need to understand where your record count is concentrated — which applications are consuming the most, which dimensions are driving growth, and where to look if you are approaching a limit.
+
+The report shows two columns that look similar but mean different things:
+
+- **Nodes** — the total number of nodes across your dimensions and applications, including duplicates where the same node appears in multiple viewpoints
+- **Record Count Contribution** — the unique node count that actually contributes to your licensed record count
+
+The Record Count Contribution figure is what matters for licensing. Oracle counts unique nodes once regardless of how many viewpoints they appear in — so a node shared across five viewpoints still counts as one record.
+
+**Option 2 — Your username (top right) → About → Subscription**
+
+This is the quick view. It shows the same two headline figures — Record Count and Total Nodes — without the application or dimension breakdown. If you just need to know where your total sits right now, this is the fastest path. It is also where Oracle's own definition of record count appears: *"a count of unique nodes across all applications grouped by business domain."*
+
+To illustrate why the distinction between these two figures matters: a deployment with 30,189 total nodes might carry a Record Count of only 13,275 — less than half the raw node figure. If you estimated your licensing position based on total nodes, you would significantly overstate where you sit against any record-based limit.
+
+**The practical step:** before any licensing conversation with Oracle, pull your Record Count figure — not your total node count. Then project where that number will be in 12, 24, and 36 months based on your implementation roadmap. That projection is the input you need to make a confident licensing model decision.
+
+---
+
 ## How to Think Through the Decision
 
 In practice, the licensing decision comes down to four questions. I find it useful to work through them in order.
