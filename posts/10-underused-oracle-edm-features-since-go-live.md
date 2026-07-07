@@ -9,8 +9,6 @@ If your organization implemented Oracle Enterprise Data Management Cloud (EDMCS)
 
 This post is written for that audience: customers who've been live for a while and are due for a second look, not a greenfield team still in the middle of build. None of what follows is exotic or requires a new license. It's all standard EDMCS functionality, available in the product today, that either didn't exist when your instance was first configured or existed but never made it onto anyone's radar because nothing forced the question. Ten capabilities, grouped into three areas: governance and validation, integration and sync, and point-in-time reconciliation, with release timing called out where it matters to when you went live.
 
-To be clear up front: this is about Oracle EDM Cloud (EDMCS) specifically — not the legacy on-premises Data Relationship Management (DRM) product it succeeded. Some of these concepts have DRM analogs, some don't, and I'll flag the difference where it matters.
-
 ---
 
 ## Governance & Validation
