@@ -115,6 +115,4 @@ Across the whole three-and-a-half-year span, three threads stand out:
 
 None of these ten features require a new license, a new module, or an upgrade. They're already there. Some existed at your go-live and got left at their defaults; others arrived in a quarterly update and never made it into your configuration because nothing broke to force the conversation. Either way, the fix is the same: periodically revisit what the platform can do now versus what it was doing on day one. Not a full re-implementation, just an honest look at the gap.
 
----
-
-*A quick accuracy note for anyone comparing this to legacy DRM experience: some of these concepts (Time Labels, for instance) have rough DRM analogs, but the mechanics, permissions, and constraints described above are specific to EDMCS as it exists today. Release timing referenced throughout reflects Oracle's monthly EDMCS "New Feature Summary" readiness documents and My Oracle Support Doc ID 2055579.1 (EPM Cloud Release Highlights) — both worth checking directly for the complete monthly changelog, including platform-wide items (security, OCI infrastructure, Redwood) not covered here, before relying on any of this in a live implementation.*
+I've only scratched the surface here. The remaining features deserve their own deep dive, so look out for a follow-up article soon.
