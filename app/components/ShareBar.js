@@ -1,7 +1,7 @@
 "use client";
 
 export default function ShareBar({ title, slug }) {
-  const url = `https://the-epm-post.vercel.app/posts/${slug}`;
+  const url = `https://the-epmpost.com/posts/${slug}`;
   const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
 
   return (
