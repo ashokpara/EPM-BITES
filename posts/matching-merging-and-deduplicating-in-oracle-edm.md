@@ -62,6 +62,8 @@ Four configuration objects do the heavy lifting. Understanding them individually
 
 Matching rules are the brains of the operation. They are created **at the Node Type level** — you inspect the target node type, then go to **Node Type → Rules → Matching → Create** to define a rule. (For a mapping rule, you inspect the node type used by the existing nodes in the mapping viewpoint.) They liberate you from the tyranny of exact-name matching: a rule can declare that two nodes match based on *properties* and *match types*, not just an identical `Name`.
 
+![The Account node type's Rules tab, Matching sub-tab — where matching rules are created. Note the Matching / Survivorship / Stopwords sub-tabs and the Create button. The sample CUSTOMER rule is grouped under its data source and shows its Properties (Description, Name), Usage (Merging), Order, and Enabled state.](/images/edm-matching/matching-rules-list.png)
+
 A few structural facts worth internalizing:
 
 - **Rules are evaluated in order.** You assign each rule an integer order value (adjustable with up/down controls). A practical tip: leave gaps between order values (10, 20, 30…) so you can insert future rules without renumbering everything.
@@ -84,7 +86,9 @@ The available operators depend on the **data type** of the property you're match
 | **Node** | Equals |
 | **Boolean** | Equals |
 
-A closer look at the operators that do the interesting work:
+![A matching rule's Definition tab — the Rule Criteria grid where each row pairs a Property with a Match Type (and an optional Match Option). Here the CUSTOMER rule matches on Core.Description and Core.Name, both using the Contains operator; extra rows are added with the + control.](/images/edm-matching/matching-rule-definition.png)
+
+Each row in that grid is one criterion — a **Property**, a **Match Type**, and (where relevant) a **Match Option** such as a Prefix Length or an offset. A closer look at the operators that do the interesting work:
 
 - **Similar To (fuzzy search)** is the star of the show. Applied to string properties, it performs a fuzzy comparison that tolerates typos, transpositions, and spelling variants — this is what lets "JPMorgan Chase & Co." match "JPMorgan Chsae." It accepts an optional **Prefix Length**, which forces an exact match on the first *N* characters before fuzzy logic kicks in. Prefix Length is both a *precision lever* (fewer false positives) and a *performance lever* (a smaller candidate set to score). But note its limit: fuzzy name matching will *never* connect "Minnesota Mining and Manufacturing Company" to "3M Company" — they share almost no characters. That case needs an **Equals** criterion on a shared property (a tax ID, DUNS, or ticker), which is precisely why rules combine criteria with AND and node types combine rules with OR.
 
@@ -114,6 +118,8 @@ Two thresholds govern how scores translate into automation:
 - **Auto Exclude Threshold** — Candidates scoring at or below this value are **never displayed** at all. This is your noise filter, keeping the workbench free of implausible matches. *Available for all rule types, including Deduplication.*
 
 The gap between these two thresholds defines the **human review zone** — the band of "maybe" matches where the machine defers to a person. Tuning that band is the central act of operating a matching program: too wide and stewards drown in reviews; too narrow and duplicates slip through automatically or get silently excluded.
+
+![A matching rule's General tab, showing where these settings live: Usage (Merging), Rule Order, Auto Accept Threshold, and an Auto Exclude Threshold of 80 — plus the rule's Application, Dimension, Node Type, and Data Source. Anything scoring 80 or below here is excluded from the workbench.](/images/edm-matching/matching-rule-general.png)
 
 > **Note on Deduplication:** Auto Accept thresholds are *not* available for deduplication rules — only Auto Exclude. Deduplication is treated as an inherently review-driven operation, because collapsing two nodes that already exist (and deleting one of them) is a higher-stakes action than merging an inbound record that hasn't landed yet.
 
