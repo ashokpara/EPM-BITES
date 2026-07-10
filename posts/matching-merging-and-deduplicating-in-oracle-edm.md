@@ -60,7 +60,7 @@ Four configuration objects do the heavy lifting. Understanding them individually
 
 ### 1. Matching Rules — How Nodes Are Compared
 
-Matching rules are the brains of the operation. They are defined **at the node type level**, and they liberate you from the tyranny of exact-name matching: a rule can declare that two nodes match based on *properties* and *match types*, not just an identical `Name`.
+Matching rules are the brains of the operation. They are created **at the Node Type level** — you inspect the target node type, then go to **Node Type → Rules → Matching → Create** to define a rule. (For a mapping rule, you inspect the node type used by the existing nodes in the mapping viewpoint.) They liberate you from the tyranny of exact-name matching: a rule can declare that two nodes match based on *properties* and *match types*, not just an identical `Name`.
 
 A few structural facts worth internalizing:
 
